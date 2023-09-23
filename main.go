@@ -17,6 +17,7 @@ type formData struct {
 
 var responses = make([]*Rsvp, 0, 10)
 var templates = make(map[string]*template.Template, 3)
+var PORT = "5000"
 
 func main() {
 	loadTemplates()
@@ -24,11 +25,11 @@ func main() {
 	http.HandleFunc("/list", listHandler)
 	http.HandleFunc("/form", formHandler)
 
-	err := http.ListenAndServe(":5000", nil)
+	fmt.Println("Server started at port" + PORT)
+	err := http.ListenAndServe(":"+PORT, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
-
 }
 
 func loadTemplates() {
@@ -56,5 +57,15 @@ func formHandler(writer http.ResponseWriter, request *http.Request) {
 		templates["form"].Execute(writer, formData{
 			Rsvp: &Rsvp{}, Errors: []string{},
 		})
+	} else if request.Method == http.MethodPost {
+		request.ParseForm()
+		responseData := Rsvp{
+			Name:       request.Form["name"][0],
+			Email:      request.Form["email"][0],
+			Phone:      request.Form["phone"][0],
+			WillAttend: request.Form["willattend"][0] == "true",
+		}
+		responses = append(responses, &responseData)
 	}
+
 }
