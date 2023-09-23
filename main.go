@@ -25,7 +25,7 @@ func main() {
 	http.HandleFunc("/list", listHandler)
 	http.HandleFunc("/form", formHandler)
 
-	fmt.Println("Server started at port" + PORT)
+	fmt.Println("Server started at port " + PORT)
 	err := http.ListenAndServe(":"+PORT, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -66,6 +66,11 @@ func formHandler(writer http.ResponseWriter, request *http.Request) {
 			WillAttend: request.Form["willattend"][0] == "true",
 		}
 		responses = append(responses, &responseData)
+		if responseData.WillAttend {
+			templates["thanks"].Execute(writer, responseData.Name)
+		} else {
+			templates["sorry"].Execute(writer, responseData.Name)
+		}
 	}
 
 }
